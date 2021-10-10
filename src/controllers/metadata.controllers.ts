@@ -61,11 +61,11 @@ export const getVolumes = (req: Request, res: Response): void => {
                model: Collection,
                where: {
                     name: req.params.nameCollection
-               },
-               order: [
-                    ["name", "asc"]
-               ]
-          }]
+               }
+          }],
+          order: [
+               ["name", "asc"]
+          ]
      }).then((data) => {
           res.send(data);
      })
