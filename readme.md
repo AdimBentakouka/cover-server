@@ -16,6 +16,21 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
 ---
 ## Patch notes
 ---
+## v0.2
+  * [ ] Gestion des utilisateurs
+    * [ ] Créer un profil
+    * [ ] Supprimer un profil
+
+  * [ ] Route metadata
+    * [ ] Afficher les volumens récemments ajoutées par ordre d'ajouts
+
+  * [ ] Route utilisateur
+    * [ ] Récupérer les volumes en cours de lecture / le prochain tome à lire
+    * [ ] Récupérer la dernière page lu d'un volume
+
+
+
+---
 ## V0.1
 
 * [x] Utilitaire Metadata :
@@ -23,7 +38,7 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
   * [x] Analyser un volume :
     * [x] Nom du volume sous la forme TXX | CHAP XXX | XXX
     * [x] Nom de la collection
-    * [x] Nombre de la page
+    * [x] Nombre de page
     * [x] Générer la Couverture
     * [x] Listes des éléments analysés
     * [x] Faire une queue des elements analysés

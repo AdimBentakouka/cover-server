@@ -4,6 +4,8 @@ import StreamZip from "node-stream-zip";
 import sharp from "sharp";
 import { createExtractorFromData, Extractor } from "node-unrar-js";
 
+sharp.cache(false);
+
 
 
 /**

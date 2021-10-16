@@ -6,6 +6,11 @@ import { Collection, Volume, sequelize } from "../models/";
 import { countPage, getPage } from "./readerVolume";
 import Sequelize from "sequelize";
 
+import Logger from "../helpers/logger";
+
+const logger = new Logger("Watcher");
+
+
 type typeVolume = {
      nameCollection?: string, // Nom de la collection dont il appartient
      nameVolume?: string, // Nom du volume
@@ -66,6 +71,11 @@ export default class Metadata {
           });
      }
 
+     private getNameCover(infoVolume: typeVolume): string 
+     {
+          return `${process.env.COVER_STORAGE}/${infoVolume.nameCollection}-${infoVolume.nameVolume}.jpg`;
+     }
+
      /**
       * * Ajout un volume à la database
       *
@@ -84,66 +94,74 @@ export default class Metadata {
                          getPage(infoVolume.filepath)
                               .then(async (page: Buffer) => {
 
-                                   const pathCover = path.basename(this.createCover(infoVolume, page));
-                                   // récupérer la taille du fichier 
-                                   fs.stat(infoVolume.filepath, async (err, stats) => {
-                                        if (err) {
-                                             console.log(err);
-                                             resolve();
-                                        }
+                                   this.createCover(infoVolume, page);
 
-                                        const tAddVolume = await sequelize.transaction();
-
-                                        let _collection = await Collection.findOne({
-                                             where: { name: infoVolume.nameCollection },
-                                             transaction: tAddVolume
-                                        });
-
-                                        if (!_collection) {
-                                             _collection = await Collection.create({
-                                                  name: infoVolume.nameCollection,
-                                             }, { transaction: tAddVolume });
-                                        }
-
-                                        let _volume = await Volume.findOne({
-                                             where: {
-                                                  name: infoVolume.nameVolume,
-                                                  collectionId: _collection.id
-                                             },
-                                             transaction: tAddVolume
-                                        });
-
-                                        if (!_volume) {
-                                             _volume = await Volume.create({
-                                                  name: infoVolume.nameVolume,
-                                                  filename: infoVolume.filepath,
-                                                  nbPages: nbPages,
-                                                  collectionId: _collection.id,
-                                                  cover: pathCover,
-                                                  sizefile: stats.size
-                                             }, { transaction: tAddVolume });
-                                        }
-                                        else {
-                                             _volume.name = infoVolume.nameVolume;
-                                             _volume.filename = infoVolume.filepath;
-                                             _volume.nbPages = nbPages;
-                                             _volume.collectionId = _collection.id;
-                                             _volume.cover = pathCover;
-                                             _volume.sizefile = stats.size;
-                                             await _volume.save({ transaction: tAddVolume });
-                                        }
-
-                                        await tAddVolume.commit();
-                                        resolve();
-                                   });
                               })
                               .catch((err: string) => {
-                                   console.error(err);
+                                   logger.error(err);
+                                   resolve();
+                              });
+
+                              const pathCover = path.basename(this.getNameCover(infoVolume));
+                              // récupérer la taille du fichier 
+                              fs.stat(infoVolume.filepath, async (err, stats) => {
+                                   if (err) {
+                                        console.log(err);
+                                        resolve();
+                                   }
+
+                                   const tAddVolume = await sequelize.transaction();
+
+                                   let _collection = await Collection.findOne({
+                                        where: { name: infoVolume.nameCollection },
+                                        transaction: tAddVolume
+                                   });
+
+                                   if (!_collection) {
+                                        _collection = await Collection.create({
+                                             name: infoVolume.nameCollection,
+                                        }, { transaction: tAddVolume });
+
+                                        logger.info("Creation de la collection "+infoVolume.nameCollection);
+                                   }
+
+                                   let _volume = await Volume.findOne({
+                                        where: {
+                                             name: infoVolume.nameVolume,
+                                             collectionId: _collection.id
+                                        },
+                                        transaction: tAddVolume
+                                   });
+
+                                   if (!_volume) {
+                                        _volume = await Volume.create({
+                                             name: infoVolume.nameVolume,
+                                             filename: infoVolume.filepath,
+                                             nbPages: nbPages,
+                                             collectionId: _collection.id,
+                                             cover: pathCover,
+                                             sizefile: stats.size
+                                        }, { transaction: tAddVolume });
+
+                                        logger.info("Insertion du volume "+infoVolume.filepath);
+                                   }
+                                   else {
+                                        _volume.name = infoVolume.nameVolume;
+                                        _volume.filename = infoVolume.filepath;
+                                        _volume.nbPages = nbPages;
+                                        _volume.collectionId = _collection.id;
+                                        _volume.cover = pathCover;
+                                        _volume.sizefile = stats.size;
+                                        await _volume.save({ transaction: tAddVolume });
+                                        logger.info("mise à jour du volume "+infoVolume.filepath);
+                                   }
+
+                                   await tAddVolume.commit();
                                    resolve();
                               });
                     })
                     .catch((err: string) => {
-                         console.error(err);
+                         logger.error(err);
                          resolve();
                     });
           });
@@ -177,19 +195,23 @@ export default class Metadata {
                          const collectionId = _volume.collectionId;
                          await _volume.destroy({ transaction: tRemoveVolume });
 
+                         logger.info(`Volume "${infoVolume.filepath}" supprimer`);
+
                          // Compter le nombre de collection toujours présent
                          const countVolume = await Volume.count({ where: { collectionId: collectionId }, transaction: tRemoveVolume });
 
                          if (countVolume === 0) {
                               const _collection = await Collection.findOne({ where: { id: collectionId }, transaction: tRemoveVolume });
                               await _collection.destroy({ transaction: tRemoveVolume });
+
+                              logger.info(`Collection "${infoVolume.nameCollection}" supprimer`);
                          }
                     }
 
                     await tRemoveVolume.commit();
                }
                else {
-                    console.warn("Warn: " + infoVolume.errorMsg);
+                    logger.error("Warn: " + infoVolume.errorMsg);
                }
                resolve();
           });
@@ -258,7 +280,7 @@ export default class Metadata {
       * @return {*}  {string} nom du fichier crée
       * @memberof Metadata
       */
-     private createCover(infoVolume: typeVolume, cover: Buffer): string {
+     private createCover(infoVolume: typeVolume, cover: Buffer): void {
           fs.mkdir(process.env.COVER_STORAGE,
                {
                     recursive: true
@@ -270,11 +292,11 @@ export default class Metadata {
                }
           );
 
-          const filename = `${process.env.COVER_STORAGE}/${infoVolume.nameCollection}-${infoVolume.nameVolume}.jpg`;
+          const filename = this.getNameCover(infoVolume);
 
           sharp(cover).resize({ width: 190, height: 286 }).toFile(filename);
 
-          return filename;
+          logger.info(`Couverture "${infoVolume.nameCollection}-${infoVolume.nameVolume}.jpg" créée !`);
      }
 
 
@@ -286,10 +308,16 @@ export default class Metadata {
       * @memberof Metadata
       */
      private removeCover(infoVolume: typeVolume): void {
-          const filename = `${process.env.COVER_STORAGE}/${infoVolume.nameCollection}-${infoVolume.nameVolume}.jpg`;
+          const filename = this.getNameCover(infoVolume);
 
           fs.unlink(filename, (err) => {
-               if (err) { console.error(err); }
+               if (err) { 
+                    logger.error(`Echec de la suppression de la couverture "${path.basename(filename)}"`);
+               }
+               else
+               {
+                    logger.info(`Couverture "${path.basename(filename)}" supprimer`);
+               }
           });
      }
 
@@ -311,21 +339,31 @@ export default class Metadata {
 
                     switch (queue.action) {
                          case "add":
+                              logger.info("ajouts du volume "+queue.filepath);
                               await this.addVolume(queue);
                               break;
                          case "check":
+                              logger.info("vérification du volume "+queue.filepath);
                               await this.checkVolume(queue);
                               break;
                          case "delete":
+                              logger.info("suppression du volume "+queue.filepath);
                               await this.removeVolume(queue);
                               break;
                          default:
+                              logger.warn("action non géré :" + queue.action);
                               console.log("[traitement]: Action non géré !");
                     }
 
                     this.removeQueueAnalyze(queue);
+
+                    logger.info("volume "+queue.filepath+" traité");
                }
+
+               logger.info("Traitement terminée !");
           }
+
+     
           //console.log("finis");
      }
 
@@ -354,7 +392,7 @@ export default class Metadata {
                this.traiter();
           }
           else {
-               console.warn("Warn: " + info.errorMsg);
+               logger.warn("Warn: " + info.errorMsg);
           }
 
      }
@@ -369,6 +407,10 @@ export default class Metadata {
       */
      public async CleanVolume(filepaths: string[]): Promise<void> {
 
+        
+          logger.info("Début du nettoyage");
+
+
           const volumes = await Volume.findAll({
                where: {
                     filename: {
@@ -382,6 +424,8 @@ export default class Metadata {
                await this.removeVolume(this.getInfoVolume(volume.filename, "delete"));
 
           }
+
+          logger.info("Fin du nettoyage");
      }
 
 

@@ -2,6 +2,11 @@ import errorHandler from "errorhandler";
 import "./config/dotenv.config";
 import app from "./app";
 
+import Logger from "./helpers/logger";
+
+const logger = new Logger("Server");
+
+
 
 /**
  * Error Handler. Provides full stack
@@ -15,11 +20,11 @@ if (process.env.NODE_ENV === "development") {
  * Start Express server.
  */
 const server = app.listen(app.get("port"), () => {
-    console.log(
-        " Server start on http://localhost:%d in %s mode",
-        app.get("port"),
-        app.get("env")
-    );
+
+    logger.info("-------------------------------------------------");
+    logger.info("- Server start !");
+    logger.info("- http://localhost:"+ app.get("port"));
+    logger.info("- "+app.get("env")+" environment");
 
 });
 

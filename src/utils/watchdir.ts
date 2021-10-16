@@ -1,6 +1,10 @@
 import chokidar from "chokidar";
 import Metadata from "./metadata";
 
+import Logger from "../helpers/logger";
+
+const logger = new Logger("Watcher");
+
 /**
  * * Class qui écoute le dossier DIR_VOLUME et appele la génération des métadonneés
  *
@@ -32,6 +36,8 @@ export default class Watcher {
           });
 
           let initWatcher = true;
+          
+          logger.info("Début de l'initialisation");
 
           this.watcher
                .on("add", (path) => {
@@ -47,6 +53,7 @@ export default class Watcher {
                     //metadata.addAnalyze(path);
                })
                .on("change", (path) => {
+                    console.log("change");
                     this.metadata.Analyze(path, "check");
                })
                .on("unlink", (path) => {
@@ -56,8 +63,11 @@ export default class Watcher {
                     }
                })
                .on("ready", () => {
+                    logger.info("Fin de l'initialisation");
                     this.metadata.CleanVolume(this.tmpFile);
                     initWatcher = false;
+
+
                });
      }
 

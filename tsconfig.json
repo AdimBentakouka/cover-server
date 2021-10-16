@@ -1,25 +1,31 @@
 {
-     "compilerOptions": {
-         "experimentalDecorators": true,
-         "module": "commonjs",
-         "esModuleInterop": true,
-         "allowSyntheticDefaultImports": true,
-         "target": "es6",
-         "noImplicitAny": true,
-         "moduleResolution": "node",
-         "sourceMap": true,
-         "outDir": "dist",
-         "baseUrl": ".",
-         "paths": {
-             "*": [
-                 "node_modules/*"
-             ]
-         },
-         "types": ["jest","@types/jest", "node"]
-     },
-     "include": [
-         "src/**/*.ts",
-         "test"
-     ]
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "allowJs": true,   
+        "outDir": "dist",
+        "noImplicitAny": true,
+        
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
 
- }
+        "moduleResolution": "node",
+        "sourceMap": true,
+
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "node_modules/*"
+            ]
+        },
+        "types": [
+            "jest",
+            "@types/jest",
+            "node"
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+        "test"
+    ]
+}
