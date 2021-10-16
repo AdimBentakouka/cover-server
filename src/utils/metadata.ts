@@ -127,7 +127,7 @@ export default class Metadata {
 
                                    let _volume = await Volume.findOne({
                                         where: {
-                                             name: infoVolume.nameVolume,
+                                             filename: infoVolume.filepath,
                                              collectionId: _collection.id
                                         },
                                         transaction: tAddVolume
@@ -421,7 +421,7 @@ export default class Metadata {
 
           for (const volume of volumes) {
 
-               await this.removeVolume(this.getInfoVolume(volume.filename, "delete"));
+               await this.Analyze(volume.filename, "delete");
 
           }
 
