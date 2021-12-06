@@ -1,12 +1,14 @@
 import express, { Application } from "express";
 
+import * as useragent from "express-useragent";
+
+
 import {sequelize} from "./models";
 import routes from "./routes/index";
 
-import Watcher from "./utils/watchdir";
-import {initMetadataController} from "./controllers/metadata.controllers";
-
 import Logger from "./helpers/logger";
+
+import init from "./config/init.config";
 
 // Create Express server
 const app : Application = express();
@@ -16,19 +18,21 @@ const logger = new Logger("App");
 
 // Express configuration
 app.set("port", process.env.PORT || 3000);
+
+
+app.use(useragent.express());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// Metadata analyses
+// Setup bdd
 sequelize.sync({force: false}).then(async () => {
      logger.info("Database connected");
 
-     // créer la classe qui génère l'écoute du dossier
-     const watcher = new Watcher();
+     //initialisation de l'application
+     init();
 
-     // partager l'instance metadata au controller metadata
-     initMetadataController(watcher.getMetadata());
+
 });
 
 

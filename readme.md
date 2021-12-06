@@ -18,8 +18,11 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
 ---
 ## v0.2
   * [ ] Gestion des utilisateurs
-    * [ ] Créer un profil
-    * [ ] Supprimer un profil
+    * [x] Créer un compte
+    * [x] Créer un compte admin par defaut
+    * [x] Connexion token & refreshToken
+    * [x] middleware auth
+    * [ ] etre authentifié pour accéder au routes de l'api sauf création & login
 
   * [ ] Route metadata
     * [ ] Afficher les volumens récemments ajoutées par ordre d'ajouts
@@ -27,6 +30,12 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
   * [ ] Route utilisateur
     * [ ] Récupérer les volumes en cours de lecture / le prochain tome à lire
     * [ ] Récupérer la dernière page lu d'un volume
+
+  * [ ] Optimisation
+    * [ ] Rendre cohérent les réponse des routes
+    * [ ] Avoir un fichier séparer pour les types
+
+  * [ ] Créer une documentation des routes
 
 
 

@@ -18,14 +18,22 @@
                 "node_modules/*"
             ]
         },
+        "typeRoots": [
+            "./src/types",
+            "./node_modules/@types"
+
+        ],
         "types": [
             "jest",
             "@types/jest",
-            "node"
-        ]
+            "node",
+        
+        ],
+  
     },
     "include": [
         "src/**/*.ts",
         "test"
+
     ]
 }
