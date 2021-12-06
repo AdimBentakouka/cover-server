@@ -72,13 +72,11 @@ export default class Logger {
                {
                     const filepath = `${this.config.filepath}/${this.name}/${_date.substring(0,10)}.${level}.log`;
      
-                    fs.mkdir(path.dirname(filepath),{recursive: true}, (err) => 
+                    fs.mkdir(path.dirname(filepath),{recursive: true}, async (err) => 
                     {
                         if(err) throw err;
                 
-                        fs.writeFile(filepath, msgWrite+"\r\n", {flag: "a+"}, (err) => {
-                            if(err) throw err;
-                        });
+                        await fs.writeFileSync(filepath, msgWrite+"\r\n", {flag: "a+"});
                     });
                }
           }

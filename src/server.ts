@@ -7,7 +7,6 @@ import Logger from "./helpers/logger";
 const logger = new Logger("Server");
 
 
-
 /**
  * Error Handler. Provides full stack
  */
