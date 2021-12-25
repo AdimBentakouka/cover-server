@@ -90,13 +90,13 @@ export function generateNewToken(refreshToken: string) : Promise<string>
                }
                else
                {
-                    reject({msg: "Invalid session"});
+                    reject("session introuvable");
                }
          
           })
           .catch((err) => {
                console.log(err);
-               reject({msg: "session introuvable"});
+               reject(err);
           });
      });
 
