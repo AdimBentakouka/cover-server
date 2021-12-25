@@ -34,13 +34,13 @@ function validateEmail(email: string) {
  * @param res Response
  */
 export const createUser = (req: Request, res: Response): void => {
-     const adresseMail: string = req.body.adresseMail;
+     const email: string = req.body.email;
      const username: string = req.body.username;
      const password: string = req.body.password;
 
      const err: string[] = [];
      //check si le formulaire est bien renseigné
-     if (!adresseMail || !validateEmail(adresseMail)) {
+     if (!email || !validateEmail(email)) {
           err.push("L'adresse mail n'est pas valide");
      }
      if (!username) {
@@ -56,17 +56,17 @@ export const createUser = (req: Request, res: Response): void => {
      else {
 
           //Check si l'adresse mail est déjà utilisé
-          User.findOne({ where: { email: adresseMail } })
+          User.findOne({ where: { email: email } })
                .then((user) => {
                     if (user) {
-                         logger.warn(`L'adresse mail ${adresseMail} a déjà été utilisée !`);
+                         logger.warn(`L'adresse mail ${email} a déjà été utilisée !`);
                          res.status(400).send("Adresse mail déjà utilisée !");
                     }
                     else {
           
                          User.create({
                               name: username,
-                              email: adresseMail,
+                              email: email,
                               password: bcrypt.hashSync(password, parseInt(process.env.SALT_BCRYPT))
 
                          }).then((user) => {
@@ -93,15 +93,15 @@ export const createUser = (req: Request, res: Response): void => {
  */
 
 export const login = (req: Request, res: Response): void => {
-     const adresseMail: string = req.body.adresseMail;
+     const email: string = req.body.email;
      const password: string = req.body.password;
 
-     if (!adresseMail || !password) {
-          res.status(400).send("Veuillez renseigner les champs adresseMail et password");
+     if (!email || !password) {
+          res.status(400).send("Veuillez renseigner les champs email et password");
      }
      else {
           //Check s'il le compte existe 
-          User.findOne({ where: { email: adresseMail } })
+          User.findOne({ where: { email: email } })
                .then(async (user) => {
                     if (user) {
                          const passwordValid = bcrypt.compareSync(password, user.password);
@@ -141,7 +141,7 @@ export const login = (req: Request, res: Response): void => {
                          }
                     }
                     else {
-                         logger.warn(`Le compte ${adresseMail} est introuvable !`);
+                         logger.warn(`Le compte ${email} est introuvable !`);
                          res.status(400).send("Le couple email / mot de passe est incorrecte !");
                     }
 
@@ -166,13 +166,13 @@ export const refreshToken = (req: Request, res: Response) : void => {
           })
           .catch((err) => {
                logger.error(JSON.stringify(err));
-               res.send(err);
+               res.status(401).send(err);
           })
           ;
      }
      else
      {
-          res.send({msg: "refreshtoken not found"});
+          res.status(401).send("refreshtoken not found");
      }
 
 };
