@@ -18,7 +18,7 @@ const logger = new Logger("App");
 
 // Express configuration
 app.set("port", process.env.PORT || 3000);
-
+ 
 
 app.use(useragent.express());
 app.use(express.json());
@@ -46,7 +46,7 @@ app.use(function (req, res, next) {
      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
  
      // Request headers you wish to allow
-     res.setHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type");
+     res.setHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type, token, refreshtoken");
  
      res.setHeader("User-Agent","*");
  
