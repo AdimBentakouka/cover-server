@@ -56,6 +56,7 @@ export const getCollections = (req: Request, res: Response): void => {
  */
 export const getVolumes = (req: Request, res: Response): void => {
      Volume.findAll({
+          attributes: ["id","name", "nbPages", "cover", "createdAt"],
           include: [{
                attributes: [],
                model: Collection,
