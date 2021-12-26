@@ -30,7 +30,7 @@ export default class Watcher {
       */
      private watcherTraitement(): void {
           this.watcher = chokidar.watch(process.env.DIR_VOLUME + "/", {
-               usePolling: true,
+               usePolling: false,
                awaitWriteFinish: true,
                depth: 1
           });
