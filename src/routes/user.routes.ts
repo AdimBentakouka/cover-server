@@ -9,7 +9,7 @@ const userRouter = Router();
 
 userRouter.post("/", userController.createUser);
 userRouter.post("/login", userController.login);
-userRouter.get("/refreshToken", userController.refreshToken);
+userRouter.get("/refreshtoken", userController.refreshToken);
 userRouter.get("/admin/validaccount/:userid", authMiddleware.authentificate, userController.validaccount);
 userRouter.get("/admin/getusers/", authMiddleware.authentificate, userController.getAllAccount);
 
