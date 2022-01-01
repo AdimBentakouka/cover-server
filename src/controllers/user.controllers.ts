@@ -1,6 +1,6 @@
 import * as bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import {IGetUserAuthInfoRequest} from "../types/express/";
+import { IGetUserAuthInfoRequest } from "../types/express/";
 
 
 import { User } from "../models";
@@ -63,7 +63,7 @@ export const createUser = (req: Request, res: Response): void => {
                          res.status(400).send("Adresse mail déjà utilisée !");
                     }
                     else {
-          
+
                          User.create({
                               name: username,
                               email: email,
@@ -156,58 +156,51 @@ export const login = (req: Request, res: Response): void => {
 
 
 
-export const refreshToken = (req: Request, res: Response) : void => {
+export const refreshToken = (req: Request, res: Response): void => {
      // récupère le refreshToken
      const refreshToken = req.headers.refreshtoken as string;
 
-     if(refreshToken) {
+     if (refreshToken) {
           Token.generateNewToken(refreshToken).then((token) => {
-               res.send({token: token});
+               res.send({ token: token });
           })
-          .catch((err) => {
-               logger.error(JSON.stringify(err));
-               res.status(401).send(err);
-          })
-          ;
+               .catch((err) => {
+                    logger.error(JSON.stringify(err));
+                    res.status(401).send(err);
+               })
+               ;
      }
-     else
-     {
+     else {
           res.status(401).send("refreshtoken not found");
      }
 
 };
 
 
-export const validaccount = (req: IGetUserAuthInfoRequest, res: Response) : void => {
+export const validaccount = (req: IGetUserAuthInfoRequest, res: Response): void => {
 
-     if(!req.user)
-     {
+     if (!req.user) {
           res.status(401).send("Authentification requise !");
      }
 
-     if(!req.user.isAdmin)
-     {
+     if (!req.user.isAdmin) {
           res.status(403).send("Vous n'avez pas les droits");
      }
 
      const userId = req.params.userid;
 
-     if(!userId)
-     {
-          res.status(404).send("userId is null");
+     if (!userId) {
+          res.status(400).send("userId is null");
      }
 
 
      //check en bdd si l'userid existe
-     User.findOne({where: {id: userId}}).then((user) => {
-          if(user)
-          {
-               if(user.accountValid)
-               {
-                    res.status(404).send("User already validate !");
+     User.findOne({ where: { id: userId } }).then((user) => {
+          if (user) {
+               if (user.accountValid) {
+                    res.status(400).send("User already validate !");
                }
-               else
-               {
+               else {
                     user.accountValid = new Date();
                     user.save();
 
@@ -217,29 +210,25 @@ export const validaccount = (req: IGetUserAuthInfoRequest, res: Response) : void
                     res.send("account validate !");
                }
           }
-          else
-          {
-               res.status(404).send("User not found !");
+          else {
+               res.status(400).send("User not found !");
           }
      })
-     .catch((err) => {
-          res.send(err);
-     });
+          .catch((err) => {
+               res.send(err);
+          });
 
 };
 
-export const getAllAccount = (req: IGetUserAuthInfoRequest, res: Response) : void => {
-     if(!req.user)
-     {
+export const getAllAccount = (req: IGetUserAuthInfoRequest, res: Response): void => {
+     if (!req.user) {
           res.status(401).send("Authentification requise !");
      }
 
-     else if(!req.user.isAdmin)
-     {
+     else if (!req.user.isAdmin) {
           res.status(403).send("Vous n'avez pas les droits");
      }
-     else
-     {
+     else {
           User.findAll({
                attributes: [
                     "id",
@@ -254,7 +243,7 @@ export const getAllAccount = (req: IGetUserAuthInfoRequest, res: Response) : voi
           }).catch((err) => {
                res.status(400).send(err);
           });
-     
+
      }
-   
+
 };
