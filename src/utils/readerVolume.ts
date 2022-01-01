@@ -112,7 +112,7 @@ function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer | strin
                     indexPage = pages.length - 1;
                }
 
-               const _page = await volume.entryDataSync(pages[indexPage].name);
+               const _page = await volume.entryDataSync(pages[indexPage]?.name);
 
                volume.close();
 
@@ -168,7 +168,7 @@ function getPageCBR(filepath: string, indexPage: number): Promise<Buffer | strin
 
                               // extraire la page souhaité
                               const extracted = extractor.extract({
-                                   files: [fileHeaders[indexPage].name]
+                                   files: [fileHeaders[indexPage]?.name]
                               });
 
                               const files = [...extracted.files]; //load the files
