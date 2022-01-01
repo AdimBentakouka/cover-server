@@ -100,7 +100,7 @@ function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer | strin
                let pages = Object.values(volume.entries());
 
                //retire les fichiers qui ne sont pas des images
-               pages = await pages.filter((__page) =>
+               pages = pages.filter((__page) =>
                     (__page.name.includes(".jpg") || __page.name.includes(".jpeg") || __page.name.includes(".png"))
                );
 
@@ -111,6 +111,17 @@ function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer | strin
                if (indexPage >= pages.length) {
                     indexPage = pages.length - 1;
                }
+
+               pages = pages.sort((a, b): number => {
+                    if (a.name < b.name) {
+                         return -1;
+                    }
+                    if (a.name > b.name) {
+                         return 1;
+                    }
+
+                    return 0;
+               });
 
                const _page = await volume.entryDataSync(pages[indexPage]?.name);
 
@@ -165,6 +176,17 @@ function getPageCBR(filepath: string, indexPage: number): Promise<Buffer | strin
                               if (indexPage >= fileHeaders.length) {
                                    indexPage = fileHeaders.length - 1;
                               }
+
+                              fileHeaders.sort((a, b): number => {
+                                   if (a.name < b.name) {
+                                        return -1;
+                                   }
+                                   if (a.name > b.name) {
+                                        return 1;
+                                   }
+
+                                   return 0;
+                              });
 
                               // extraire la page souhaité
                               const extracted = extractor.extract({
