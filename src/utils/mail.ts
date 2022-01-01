@@ -4,6 +4,10 @@ import Logger from "../helpers/logger";
 
 const logger = new Logger("mail");
 
+const CLIENT_URL_VALID_ACCOUNT = process.env.CLIENT_URL_VALID_ACCOUNT || "http://localhost:3001/user/admin/validaccount/";
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3001/auth/login";
+
+
 const smtpTransport = nodemailer.createTransport({
      service: process.env.SMTP_SERVICE,
      secure: true,
@@ -27,35 +31,35 @@ const email = new EmailTemplate({
 
 export function sendMailValidAccount(name: string, userid: string): void {
 
-    email.render("../src/views/mail/valideAccount.html.twig", {name: name, url: "http://localhost:8080/user/admin/validaccount/"+userid})
-    .then((result) => {
-          smtpTransport.sendMail({
-               from: process.env.SMTP_USER,
-               to: process.env.SMTP_USER,
-               subject: "[CoverJS] - Nouvel utilisateur",
-               html: result
-          }, (err, info) => {
-               if (err) logger.error(err.toString());
-               else logger.info(info.response);
-          }); 
-    });
+     email.render("../src/views/mail/valideAccount.html.twig", { name: name, url: `${CLIENT_URL_VALID_ACCOUNT}${userid}` })
+          .then((result) => {
+               smtpTransport.sendMail({
+                    from: process.env.SMTP_USER,
+                    to: process.env.SMTP_USER,
+                    subject: "[CoverJS] - Nouvel utilisateur",
+                    html: result
+               }, (err, info) => {
+                    if (err) logger.error(err.toString());
+                    else logger.info(info.response);
+               });
+          });
 
 }
 
 export function sendMailValid(name: string, mail: string): void {
 
-     email.render("../src/views/mail/comptevalide.html.twig", {name: name, url: "http://localhost:3000/login"})
-     .then((result) => {
-           smtpTransport.sendMail({
-                from: process.env.SMTP_USER,
-                to: mail,
-                subject: "[CoverJS] - ton compte a été validé",
-                html: result
-           }, (err, info) => {
-                if (err) logger.error(err.toString());
-                else logger.info(info.response);
-           }); 
-     });
- 
- }
- 
+     email.render("../src/views/mail/comptevalide.html.twig", { name: name, url: CLIENT_URL })
+          .then((result) => {
+               smtpTransport.sendMail({
+                    from: process.env.SMTP_USER,
+                    to: mail,
+                    subject: "[CoverJS] - ton compte a été validé",
+                    html: result
+               }, (err, info) => {
+                    if (err) logger.error(err.toString());
+                    else logger.info(info.response);
+               });
+          });
+
+}
+
