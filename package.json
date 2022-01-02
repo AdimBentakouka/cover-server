@@ -1,6 +1,6 @@
 {
   "name": "coverjs-server-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "src/app.ts",
   "nodemonConfig": {
@@ -12,19 +12,13 @@
     "delay": 1000
   },
   "scripts": {
-    "build-ts": "tsc",
-    "build": "npm run build-ts && npm run lint",
-    "start": "npm run serve",
-    "debug": "npm run watch-debug",
-    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
-    "serve-debug": "nodemon src/server.ts",
-    "serve": "node dist/src/server.js",
-    "test": "jest --forceExit --coverage --verbose",
-    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run serve-debug\"",
-    "watch-node": "nodemon dist/server.js",
-    "watch-test": "npm run test -- --watchAll",
-    "watch-ts": "tsc -w",
-    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"npm run watch-ts\" \"npm run watch-node\""
+    "dev": "nodemon ./src/server.ts",
+    "start": "ts-node ./dist/src/server.js",
+    "clean": "rmdir /s /q node_modules",
+    "clean:build": "rm -r ./dist",
+    "clean:build:win": "rmdir /s /q dist",
+    "build": "tsc -p ./ && npm run copyViews",
+    "copyViews": "copyfiles --error --up 1 src/views/**/*.twig dist/src/"
   },
   "author": "",
   "license": "ISC",
@@ -48,7 +42,7 @@
     "nodemailer": "^6.7.0",
     "sequelize": "^6.6.5",
     "sharp": "^0.29.1",
-    "sqlite3": "^4.2.0",
+    "sqlite3": "^5.0.2",
     "twig": "^1.15.4",
     "unique-string-generator": "^1.0.3"
   },
@@ -68,6 +62,7 @@
     "@types/supertest": "^2.0.11",
     "@types/validator": "^13.6.3",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^7.32.0",
     "jest": "^27.2.4",
     "nodemon": "^2.0.13",

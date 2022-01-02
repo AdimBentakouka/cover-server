@@ -16,16 +16,18 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
 ---
 ## Patch notes
 ---
-## v0.2
-  * [ ] Gestion des utilisateurs
+## v1.2.0
+  * [x] Gestion des utilisateurs
     * [x] Créer un compte
     * [x] Créer un compte admin par defaut
     * [x] Connexion token & refreshToken
     * [x] middleware auth
-    * [ ] etre authentifié pour accéder au routes de l'api sauf création & login
+    * [x] etre authentifié pour accéder au routes de l'api sauf création & login
 
   * [ ] Route metadata
     * [ ] Afficher les volumens récemments ajoutées par ordre d'ajouts
+  * [ ] Services metadata
+    * [ ] Si cover.jpg présent dans le repertoire prendre cette image comme couverture pour tous les volumes
 
   * [ ] Route utilisateur
     * [ ] Récupérer les volumes en cours de lecture / le prochain tome à lire
@@ -37,10 +39,13 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
 
   * [ ] Créer une documentation des routes
 
+---
+## v1.0.1
 
+* [x] Correction des chemins des templates pour les mails
 
 ---
-## V0.1
+## V1.0.0
 
 * [x] Utilitaire Metadata :
   

@@ -31,7 +31,7 @@ const email = new EmailTemplate({
 
 export function sendMailValidAccount(name: string, userid: string): void {
 
-     email.render("../src/views/mail/valideAccount.html.twig", { name: name, url: `${CLIENT_URL_VALID_ACCOUNT}${userid}` })
+     email.render(`${__dirname}/../views/mail/valideAccount.html.twig`, { name: name, url: `${CLIENT_URL_VALID_ACCOUNT}${userid}` })
           .then((result) => {
                smtpTransport.sendMail({
                     from: process.env.SMTP_USER,
@@ -42,13 +42,14 @@ export function sendMailValidAccount(name: string, userid: string): void {
                     if (err) logger.error(err.toString());
                     else logger.info(info.response);
                });
-          });
+          })
+          .catch((err) => logger.error(err));
 
 }
 
 export function sendMailValid(name: string, mail: string): void {
 
-     email.render("../src/views/mail/comptevalide.html.twig", { name: name, url: CLIENT_URL })
+     email.render(`${__dirname}/../views/mail/comptevalide.html.twig`, { name: name, url: CLIENT_URL })
           .then((result) => {
                smtpTransport.sendMail({
                     from: process.env.SMTP_USER,
@@ -59,7 +60,8 @@ export function sendMailValid(name: string, mail: string): void {
                     if (err) logger.error(err.toString());
                     else logger.info(info.response);
                });
-          });
+          })
+          .catch((err) => logger.error(err));
 
 }
 

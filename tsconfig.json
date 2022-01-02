@@ -2,38 +2,33 @@
     "compilerOptions": {
         "target": "es6",
         "module": "commonjs",
-        "allowJs": true,   
+        "allowJs": true,
         "outDir": "dist",
+        "rootDir": ".",
         "noImplicitAny": true,
-        
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-
         "moduleResolution": "node",
         "sourceMap": true,
-
         "baseUrl": ".",
         "paths": {
             "*": [
-                "node_modules/*"
+                "node_modules/*",
             ]
         },
         "typeRoots": [
             "./src/types",
             "./node_modules/@types"
-
         ],
         "types": [
             "jest",
             "@types/jest",
             "node",
-        
         ],
-  
     },
     "include": [
         "src/**/*.ts",
+        "src/views/*",
         "test"
-
     ]
 }
