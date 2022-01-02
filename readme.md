@@ -17,12 +17,6 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
 ## Patch notes
 ---
 ## v1.2.0
-  * [x] Gestion des utilisateurs
-    * [x] Créer un compte
-    * [x] Créer un compte admin par defaut
-    * [x] Connexion token & refreshToken
-    * [x] middleware auth
-    * [x] etre authentifié pour accéder au routes de l'api sauf création & login
 
   * [ ] Route metadata
     * [ ] Afficher les volumens récemments ajoutées par ordre d'ajouts
@@ -40,9 +34,16 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
   * [ ] Créer une documentation des routes
 
 ---
-## v1.0.1
+## v1.5.0
 
-* [x] Correction des chemins des templates pour les mails
+  * [x] Correction des chemins des templates pour les mails
+
+  * [x] Gestion des utilisateurs
+    * [x] Créer un compte
+    * [x] Créer un compte admin par defaut
+    * [x] Connexion token & refreshToken
+    * [x] middleware auth
+    * [x] etre authentifié pour accéder au routes de l'api sauf création & login
 
 ---
 ## V1.0.0
