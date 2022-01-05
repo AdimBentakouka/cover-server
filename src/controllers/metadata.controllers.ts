@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { Sequelize } from "sequelize";
 import fs from "fs";
-import Metadata from "../utils/metadata";
-import { Collection, Volume } from "../models/";
+
+import Metadata from "../utils/metadata/metadata";
+
+import { Volume } from "../models/";
 
 
 
@@ -22,24 +24,20 @@ export const initMetadataController = (metadata: Metadata): void => {
  * @param res 
  */
 export const getCollections = (req: Request, res: Response): void => {
-     Collection.findAll({
+     Volume.findAll({
           attributes: [
                "id",
-               "name",
+               ["collectionName", "name"],
                [Sequelize.col("volumes.cover"), "cover"],
                [Sequelize.fn("COUNT", Sequelize.col("*")), "nbVolumes"],
                "createdAt",
                "updatedAt"
 
           ],
-          include: [{
-               attributes: [],
-               model: Volume
 
-          }],
-
-          group: "collections.name",
+          group: "collectionName",
           order: [
+               ["collectionName", "asc"],
                ["name", "asc"]
           ]
      }).then((data) => {
@@ -56,14 +54,10 @@ export const getCollections = (req: Request, res: Response): void => {
  */
 export const getVolumes = (req: Request, res: Response): void => {
      Volume.findAll({
-          attributes: ["id","name", "nbPages", "cover", "createdAt"],
-          include: [{
-               attributes: [],
-               model: Collection,
-               where: {
-                    name: req.params.nameCollection
-               }
-          }],
+          attributes: ["id", "name", "nbPages", "cover", "createdAt"],
+          where: {
+               collectionName: req.params.nameCollection
+          },
           order: [
                ["name", "asc"]
           ]

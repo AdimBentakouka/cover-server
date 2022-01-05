@@ -14,8 +14,8 @@ sharp.cache(false);
  * @param {string} filepath chemin du fichier a récupérer
  * @return {*}  {(Promise<number | string>)} soit un nombre soit une erreur
  */
-function countPageCBZ(filepath: string): Promise<number | string> {
-     return new Promise<number | string>((resolve, reject) => {
+function countPageCBZ(filepath: string): Promise<number> {
+     return new Promise<number>((resolve, reject) => {
           const volume = new StreamZip({
                file: filepath,
                storeEntries: true
@@ -46,8 +46,8 @@ function countPageCBZ(filepath: string): Promise<number | string> {
  * @param {string} filepath chemin du fichier a récupérer
  * @return {*}  {(Promise<number | string>)} soit un nombre soit une erreur
  */
-function countPageCBR(filepath: string): Promise<number | string> {
-     return new Promise<number | string>(async (resolve, reject) => {
+function countPageCBR(filepath: string): Promise<number> {
+     return new Promise<number>(async (resolve, reject) => {
 
           fs.access(filepath, fs.constants.F_OK, (err) => {
                if (err) {
@@ -89,7 +89,7 @@ function countPageCBR(filepath: string): Promise<number | string> {
  * @param {number} indexPage numéro de page
  * @return {*}  {(Promise<Buffer | string>)}
  */
-function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer | string> {
+function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer> {
      return new Promise<Buffer>(async (resolve, reject) => {
           const volume = new StreamZip({
                file: filepath,
@@ -144,9 +144,9 @@ function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer | strin
  * @return {*}  {(Promise<Buffer | string>)}
  */
 
-function getPageCBR(filepath: string, indexPage: number): Promise<Buffer | string> {
+function getPageCBR(filepath: string, indexPage: number): Promise<Buffer> {
 
-     return new Promise<Buffer | string>(async (resolve, reject) => {
+     return new Promise<Buffer>(async (resolve, reject) => {
 
           fs.access(filepath, fs.constants.F_OK, (err) => {
                if (err) {
@@ -214,9 +214,9 @@ function getPageCBR(filepath: string, indexPage: number): Promise<Buffer | strin
  * @param {string} filepath
  * @return {*}  {(Promise<number | string>)}
  */
-export async function countPage(filepath: string): Promise<number | string> {
+export async function countPage(filepath: string): Promise<number> {
 
-     return new Promise<number | string>(async (resolve, reject) => {
+     return new Promise<number>(async (resolve, reject) => {
 
           const ext = path.extname(filepath);
 
@@ -260,9 +260,9 @@ export async function countPage(filepath: string): Promise<number | string> {
  * @param {number} [page=1] page à afficher
  * @return {*}  {(Promise<Buffer | string>)}
  */
-export async function getPage(filepath: string, page: number = 1): Promise<Buffer | string> {
+export async function getPage(filepath: string, page: number = 1): Promise<Buffer> {
 
-     return new Promise<Buffer | string>(async (resolve, reject) => {
+     return new Promise<Buffer>(async (resolve, reject) => {
 
           const ext = path.extname(filepath);
 

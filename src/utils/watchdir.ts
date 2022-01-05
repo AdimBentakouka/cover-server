@@ -1,5 +1,5 @@
 import chokidar from "chokidar";
-import Metadata from "./metadata";
+import Metadata from "./metadata/metadata";
 
 import Logger from "../helpers/logger";
 
@@ -14,7 +14,6 @@ const logger = new Logger("Watcher");
 export default class Watcher {
      private metadata: Metadata;
      private watcher: chokidar.FSWatcher;
-     private tmpFile: string[] = [];
 
      constructor() {
           this.metadata = new Metadata();
@@ -36,39 +35,38 @@ export default class Watcher {
           });
 
           let initWatcher = true;
-          
-          logger.info("Début de l'initialisation");
+          const fileWatcher: string[] = [];
+
+          logger.info("Initilisation de tous les fichiers présents");
 
           this.watcher
                .on("add", (path) => {
-
                     if (initWatcher) {
-                         this.tmpFile.push(path);
-                         this.metadata.Analyze(path, "check");
+                         fileWatcher.push(path);
                     }
-                    else {
-                         this.metadata.Analyze(path, "add");
-                    }
-
-                    //metadata.addAnalyze(path);
+                    this.traiter(path);
                })
                .on("change", (path) => {
-                    console.log("change");
-                    this.metadata.Analyze(path, "check");
+                    this.traiter(path, "add");
                })
                .on("unlink", (path) => {
-                    //console.log("cc");
-                    if (!initWatcher) {
-                         this.metadata.Analyze(path, "delete");
-                    }
+                    this.traiter(path, "delete");
                })
                .on("ready", () => {
-                    logger.info("Fin de l'initialisation");
-                    this.metadata.CleanVolume(this.tmpFile);
+                    logger.info("Initilisation terminée !");
                     initWatcher = false;
 
-
+                    this.metadata.cleanVolume(fileWatcher);
                });
+
+     }
+
+
+     // Check si l'extension est autorisée et fait le traitement du fichier
+     private traiter(path: string, action: string = "add"): void {
+          if (this.metadata.extIsAllowed(path)) {
+               this.metadata.Analyse(path, action);
+          }
      }
 
 
