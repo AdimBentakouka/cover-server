@@ -1,49 +1,47 @@
 import { BuildOptions, DataTypes, Model, Sequelize } from "sequelize";
 
 export interface VolumeAttributes {
-     id?: number;
-     name: string;
-     collectionName: string;
-     filename: string;
-     nbPages: number;
-     cover: string;
-     sizefile: number;
-     createdAt?: Date;
-     updatedAt?: Date;
-
+	id?: number;
+	name: string;
+	collectionId: number;
+	filename: string;
+	nbPages: number;
+	cover: string;
+	sizefile: number;
+	createdAt?: Date;
+	updatedAt?: Date;
 }
-export interface VolumeModel extends Model<VolumeAttributes>, VolumeAttributes { }
-export class Volume extends Model<VolumeModel, VolumeAttributes> { }
+export interface VolumeModel extends Model<VolumeAttributes>, VolumeAttributes {}
+export class Volume extends Model<VolumeModel, VolumeAttributes> {}
 
 export type VolumeStatic = typeof Model & {
-     new(values?: Record<string, unknown>, options?: BuildOptions): VolumeModel;
+	new (values?: Record<string, unknown>, options?: BuildOptions): VolumeModel;
 };
 
 export function VolumeFactory(sequelize: Sequelize): VolumeStatic {
-     return <VolumeStatic>sequelize.define("volumes", {
-          id: {
-               type: DataTypes.INTEGER,
-               autoIncrement: true,
-               primaryKey: true
-          },
-          name: {
-               type: DataTypes.STRING
-          },
-          filename: {
-               type: DataTypes.STRING
-          },
-          nbPages: {
-               type: DataTypes.INTEGER
-          },
-          cover: {
-               type: DataTypes.STRING
-          },
-          sizefile: {
-               type: DataTypes.INTEGER
-          },
-          collectionName: {
-               type: DataTypes.STRING
-          }
-     });
+	return <VolumeStatic>sequelize.define("volumes", {
+		id: {
+			type: DataTypes.INTEGER,
+			autoIncrement: true,
+			primaryKey: true,
+		},
+		name: {
+			type: DataTypes.STRING,
+		},
+		filename: {
+			type: DataTypes.STRING,
+		},
+		nbPages: {
+			type: DataTypes.INTEGER,
+		},
+		cover: {
+			type: DataTypes.STRING,
+		},
+		sizefile: {
+			type: DataTypes.INTEGER,
+		},
+		collectionId: {
+			type: DataTypes.INTEGER,
+		},
+	});
 }
-
