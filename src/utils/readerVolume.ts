@@ -6,38 +6,34 @@ import { createExtractorFromData, Extractor } from "node-unrar-js";
 
 sharp.cache(false);
 
-
-
 /**
  *Retourne le nombre de page d'un volume de type CBZ
  *
  * @param {string} filepath chemin du fichier a récupérer
- * @return {*}  {(Promise<number | string>)} soit un nombre soit une erreur
+ * @return {*}  {(Promise<number>)} soit un nombre soit une erreur
  */
-function countPageCBZ(filepath: string): Promise<number | string> {
-     return new Promise<number | string>((resolve, reject) => {
-          const volume = new StreamZip({
-               file: filepath,
-               storeEntries: true
-          });
+function countPageCBZ(filepath: string): Promise<number> {
+	return new Promise<number>((resolve, reject) => {
+		const volume = new StreamZip({
+			file: filepath,
+			storeEntries: true,
+		});
 
-          volume.on("ready", async () => {
-               let pages = Object.values(volume.entries());
+		volume.on("ready", async () => {
+			let pages = Object.values(volume.entries());
 
-               //retire les fichiers qui ne sont pas des images
-               pages = pages.filter((__page) =>
-                    (__page.name.includes(".jpg") || __page.name.includes(".jpeg") || __page.name.includes(".png"))
-               );
+			//retire les fichiers qui ne sont pas des images
+			pages = pages.filter((__page) => __page.name.includes(".jpg") || __page.name.includes(".jpeg") || __page.name.includes(".png"));
 
-               volume.close();
+			volume.close();
 
-               resolve(pages.length);
-          });
+			resolve(pages.length);
+		});
 
-          volume.on("error", err => {
-               reject(err.toString());
-          });
-     });
+		volume.on("error", (err) => {
+			reject(err.toString());
+		});
+	});
 }
 
 /**
@@ -46,40 +42,36 @@ function countPageCBZ(filepath: string): Promise<number | string> {
  * @param {string} filepath chemin du fichier a récupérer
  * @return {*}  {(Promise<number | string>)} soit un nombre soit une erreur
  */
-function countPageCBR(filepath: string): Promise<number | string> {
-     return new Promise<number | string>(async (resolve, reject) => {
+function countPageCBR(filepath: string): Promise<number> {
+	return new Promise<number>(async (resolve, reject) => {
+		fs.access(filepath, fs.constants.F_OK, (err) => {
+			if (err) {
+				reject(err.toString());
+			} else {
+				//file exists
+				// ouvrir le cbr et bufferiser
+				const volume = Uint8Array.from(fs.readFileSync(filepath)).buffer;
 
-          fs.access(filepath, fs.constants.F_OK, (err) => {
-               if (err) {
-                    reject(err.toString());
-               }
-               else {
-                    //file exists
-                    // ouvrir le cbr et bufferiser
-                    const volume = Uint8Array.from(fs.readFileSync(filepath)).buffer;
+				createExtractorFromData({
+					data: volume,
+				})
+					.then((extractor: Extractor<Uint8Array>) => {
+						// récupère les infos de toutes les pages
+						const list = extractor.getFileList();
 
-                    createExtractorFromData({
-                         data: volume
-                    })
-                         .then((extractor: Extractor<Uint8Array>) => {
+						// charges tous les headers
+						let fileHeaders = [...list.fileHeaders]; // load the file headers
 
-                              // récupère les infos de toutes les pages
-                              const list = extractor.getFileList();
+						fileHeaders = fileHeaders.filter((__page) => __page.flags.directory == false);
 
-                              // charges tous les headers
-                              let fileHeaders = [...list.fileHeaders]; // load the file headers
-
-                              fileHeaders = fileHeaders.filter((__page) => __page.flags.directory == false);
-
-                              resolve(fileHeaders.length);
-
-                         })
-                         .catch((err: string) => {
-                              reject(err.toString());
-                         });
-               }
-          });
-     });
+						resolve(fileHeaders.length);
+					})
+					.catch((err: string) => {
+						reject(err.toString());
+					});
+			}
+		});
+	});
 }
 
 /**
@@ -89,51 +81,49 @@ function countPageCBR(filepath: string): Promise<number | string> {
  * @param {number} indexPage numéro de page
  * @return {*}  {(Promise<Buffer | string>)}
  */
-function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer | string> {
-     return new Promise<Buffer>(async (resolve, reject) => {
-          const volume = new StreamZip({
-               file: filepath,
-               storeEntries: true
-          });
+function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer> {
+	return new Promise<Buffer>(async (resolve, reject) => {
+		const volume = new StreamZip({
+			file: filepath,
+			storeEntries: true,
+		});
 
-          volume.on("ready", async () => {
-               let pages = Object.values(volume.entries());
+		volume.on("ready", async () => {
+			let pages = Object.values(volume.entries());
 
-               //retire les fichiers qui ne sont pas des images
-               pages = pages.filter((__page) =>
-                    (__page.name.includes(".jpg") || __page.name.includes(".jpeg") || __page.name.includes(".png"))
-               );
+			//retire les fichiers qui ne sont pas des images
+			pages = pages.filter((__page) => __page.name.includes(".jpg") || __page.name.includes(".jpeg") || __page.name.includes(".png"));
 
-               // controle sur les pages a obtenir
-               if (indexPage < 0) {
-                    indexPage = 0;
-               }
-               if (indexPage >= pages.length) {
-                    indexPage = pages.length - 1;
-               }
+			// controle sur les pages a obtenir
+			if (indexPage < 0) {
+				indexPage = 0;
+			}
+			if (indexPage >= pages.length) {
+				indexPage = pages.length - 1;
+			}
 
-               pages = pages.sort((a, b): number => {
-                    if (a.name < b.name) {
-                         return -1;
-                    }
-                    if (a.name > b.name) {
-                         return 1;
-                    }
+			pages = pages.sort((a, b): number => {
+				if (a.name < b.name) {
+					return -1;
+				}
+				if (a.name > b.name) {
+					return 1;
+				}
 
-                    return 0;
-               });
+				return 0;
+			});
 
-               const _page = await volume.entryDataSync(pages[indexPage]?.name);
+			const _page = await volume.entryDataSync(pages[indexPage]?.name);
 
-               volume.close();
+			volume.close();
 
-               resolve(_page);
-          });
+			resolve(_page);
+		});
 
-          volume.on("error", err => {
-               reject(err.toString());
-          });
-     });
+		volume.on("error", (err) => {
+			reject(err.toString());
+		});
+	});
 }
 
 /**
@@ -144,112 +134,100 @@ function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer | strin
  * @return {*}  {(Promise<Buffer | string>)}
  */
 
-function getPageCBR(filepath: string, indexPage: number): Promise<Buffer | string> {
+function getPageCBR(filepath: string, indexPage: number): Promise<Buffer> {
+	return new Promise<Buffer>(async (resolve, reject) => {
+		fs.access(filepath, fs.constants.F_OK, (err) => {
+			if (err) {
+				reject(err.toString());
+			} else {
+				//file exists
+				// ouvrir le cbr et bufferiser
+				const volume = Uint8Array.from(fs.readFileSync(filepath)).buffer;
 
-     return new Promise<Buffer | string>(async (resolve, reject) => {
+				createExtractorFromData({
+					data: volume,
+				})
+					.then(async (extractor: Extractor<Uint8Array>) => {
+						// récupère les infos de toutes les pages
+						const list = extractor.getFileList();
 
-          fs.access(filepath, fs.constants.F_OK, (err) => {
-               if (err) {
-                    reject(err.toString());
-               }
-               else {
-                    //file exists
-                    // ouvrir le cbr et bufferiser
-                    const volume = Uint8Array.from(fs.readFileSync(filepath)).buffer;
+						// charges tous les headers
+						let fileHeaders = [...list.fileHeaders]; // load the file headers
 
-                    createExtractorFromData({
-                         data: volume
-                    })
-                         .then(async (extractor: Extractor<Uint8Array>) => {
+						fileHeaders = fileHeaders.filter((__page) => __page.flags.directory == false);
 
-                              // récupère les infos de toutes les pages
-                              const list = extractor.getFileList();
+						if (indexPage < 0) {
+							indexPage = 0;
+						}
+						if (indexPage >= fileHeaders.length) {
+							indexPage = fileHeaders.length - 1;
+						}
 
-                              // charges tous les headers
-                              let fileHeaders = [...list.fileHeaders]; // load the file headers
+						fileHeaders.sort((a, b): number => {
+							if (a.name < b.name) {
+								return -1;
+							}
+							if (a.name > b.name) {
+								return 1;
+							}
 
-                              fileHeaders = fileHeaders.filter((__page) => __page.flags.directory == false);
+							return 0;
+						});
 
-                              if (indexPage < 0) {
-                                   indexPage = 0;
-                              }
-                              if (indexPage >= fileHeaders.length) {
-                                   indexPage = fileHeaders.length - 1;
-                              }
+						// extraire la page souhaité
+						const extracted = extractor.extract({
+							files: [fileHeaders[indexPage]?.name],
+						});
 
-                              fileHeaders.sort((a, b): number => {
-                                   if (a.name < b.name) {
-                                        return -1;
-                                   }
-                                   if (a.name > b.name) {
-                                        return 1;
-                                   }
+						const files = [...extracted.files]; //load the files
 
-                                   return 0;
-                              });
-
-                              // extraire la page souhaité
-                              const extracted = extractor.extract({
-                                   files: [fileHeaders[indexPage]?.name]
-                              });
-
-                              const files = [...extracted.files]; //load the files
-
-                              resolve(await sharp(files[0].extraction).toBuffer());
-
-                         })
-                         .catch((err: string) => {
-                              reject(err.toString());
-                         });
-               }
-          });
-     });
-
+						resolve(await sharp(files[0].extraction).toBuffer());
+					})
+					.catch((err: string) => {
+						reject(err.toString());
+					});
+			}
+		});
+	});
 }
 
 /**
- * 
+ *
  * * compte le nombre de page sur un volume
  * @export
  * @param {string} filepath
  * @return {*}  {(Promise<number | string>)}
  */
-export async function countPage(filepath: string): Promise<number | string> {
+export async function countPage(filepath: string): Promise<number> {
+	return new Promise<number>(async (resolve, reject) => {
+		const ext = path.extname(filepath);
 
-     return new Promise<number | string>(async (resolve, reject) => {
+		switch (ext) {
+			case ".zip":
+			case ".cbz":
+				countPageCBZ(filepath)
+					.then((nbPage: number) => {
+						resolve(nbPage);
+					})
+					.catch((err: string) => {
+						reject(err);
+					});
 
-          const ext = path.extname(filepath);
-
-
-          switch (ext) {
-               case ".zip":
-               case ".cbz":
-                    countPageCBZ(filepath)
-                         .then((nbPage: number) => {
-                              resolve(nbPage);
-                         })
-                         .catch((err: string) => {
-                              reject(err);
-                         });
-
-                    break;
-               case ".rar":
-               case ".cbr":
-                    countPageCBR(filepath)
-                         .then((nbPage: number) => {
-                              resolve(nbPage);
-                         })
-                         .catch((err: string) => {
-                              reject(err);
-                         });
-                    break;
-               default:
-                    reject("l'extensions n'est pas pris en charge");
-
-          }
-
-     });
-
+				break;
+			case ".rar":
+			case ".cbr":
+				countPageCBR(filepath)
+					.then((nbPage: number) => {
+						resolve(nbPage);
+					})
+					.catch((err: string) => {
+						reject(err);
+					});
+				break;
+			default:
+				reject("l'extensions n'est pas pris en charge");
+		}
+	});
 }
 
 /**
@@ -260,40 +238,34 @@ export async function countPage(filepath: string): Promise<number | string> {
  * @param {number} [page=1] page à afficher
  * @return {*}  {(Promise<Buffer | string>)}
  */
-export async function getPage(filepath: string, page: number = 1): Promise<Buffer | string> {
+export async function getPage(filepath: string, page: number = 1): Promise<Buffer> {
+	return new Promise<Buffer>(async (resolve, reject) => {
+		const ext = path.extname(filepath);
 
-     return new Promise<Buffer | string>(async (resolve, reject) => {
+		switch (ext) {
+			case ".zip":
+			case ".cbz":
+				getPageCBZ(filepath, page - 1)
+					.then((dataPage: Buffer) => {
+						resolve(dataPage);
+					})
+					.catch((err: string) => {
+						reject(err);
+					});
 
-          const ext = path.extname(filepath);
-
-
-          switch (ext) {
-               case ".zip":
-               case ".cbz":
-                    getPageCBZ(filepath, page - 1)
-                         .then((dataPage: Buffer) => {
-                              resolve(dataPage);
-                         })
-                         .catch((err: string) => {
-                              reject(err);
-                         });
-
-                    break;
-               case ".rar":
-               case ".cbr":
-                    getPageCBR(filepath, page - 1)
-                         .then((dataPage: Buffer) => {
-                              resolve(dataPage);
-                         })
-                         .catch((err: string) => {
-                              reject(err);
-                         });
-                    break;
-               default:
-                    reject("l'extensions n'est pas pris en charge");
-
-          }
-     });
-
+				break;
+			case ".rar":
+			case ".cbr":
+				getPageCBR(filepath, page - 1)
+					.then((dataPage: Buffer) => {
+						resolve(dataPage);
+					})
+					.catch((err: string) => {
+						reject(err);
+					});
+				break;
+			default:
+				reject("l'extensions n'est pas pris en charge");
+		}
+	});
 }
-

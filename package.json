@@ -1,6 +1,6 @@
 {
-  "name": "coverjs-server-ts",
-  "version": "1.0.5",
+  "name": "coverjs-server",
+  "version": "1.1.0",
   "description": "",
   "main": "src/app.ts",
   "nodemonConfig": {
@@ -8,11 +8,10 @@
       "dist/*",
       "*.sqlite",
       "/public/*"
-    ],
-    "delay": 1000
+    ]
   },
   "scripts": {
-    "dev": "nodemon ./src/server.ts",
+    "start:dev": "nodemon ./src/server.ts",
     "start": "ts-node ./dist/src/server.js",
     "clean": "rmdir /s /q node_modules",
     "clean:build": "rm -r ./dist",
@@ -23,9 +22,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "await-to-js": "^3.0.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
-    "bull": "^3.29.2",
     "chai": "^4.3.4",
     "chokidar": "^3.5.2",
     "concurrently": "^6.3.0",

@@ -1,5 +1,5 @@
 import chokidar from "chokidar";
-import Metadata from "./metadata";
+import Metadata from "./metadata/metadata";
 
 import Logger from "../helpers/logger";
 
@@ -12,76 +12,67 @@ const logger = new Logger("Watcher");
  * @class Watcher
  */
 export default class Watcher {
-     private metadata: Metadata;
-     private watcher: chokidar.FSWatcher;
-     private tmpFile: string[] = [];
+	private metadata: Metadata;
+	private watcher: chokidar.FSWatcher;
 
-     constructor() {
-          this.metadata = new Metadata();
-          this.watcherTraitement();
-     }
+	constructor() {
+		this.metadata = new Metadata();
+		this.watcherTraitement();
+	}
 
+	/**
+	 * * file de traitement
+	 *
+	 * @private
+	 * @memberof Watcher
+	 */
+	private watcherTraitement(): void {
+		this.watcher = chokidar.watch(process.env.DIR_VOLUME + "/", {
+			usePolling: false,
+			awaitWriteFinish: true,
+			depth: 1,
+		});
 
-     /**
-      * * file de traitement
-      *
-      * @private
-      * @memberof Watcher
-      */
-     private watcherTraitement(): void {
-          this.watcher = chokidar.watch(process.env.DIR_VOLUME + "/", {
-               usePolling: false,
-               awaitWriteFinish: true,
-               depth: 1
-          });
+		let initWatcher = true;
+		const fileWatcher: string[] = [];
 
-          let initWatcher = true;
-          
-          logger.info("Début de l'initialisation");
+		logger.info("Initilisation de tous les fichiers présents");
 
-          this.watcher
-               .on("add", (path) => {
+		this.watcher
+			.on("add", (filepath) => {
+				if (initWatcher) {
+					fileWatcher.push(filepath);
+				}
+				this.traiter(filepath);
+			})
+			.on("change", (filepath) => {
+				this.traiter(filepath, "add");
+			})
+			.on("unlink", (filepath) => {
+				this.traiter(filepath, "remove");
+			})
+			.on("ready", () => {
+				logger.info("Initilisation terminée !");
+				initWatcher = false;
 
-                    if (initWatcher) {
-                         this.tmpFile.push(path);
-                         this.metadata.Analyze(path, "check");
-                    }
-                    else {
-                         this.metadata.Analyze(path, "add");
-                    }
+				this.metadata.cleanVolume(fileWatcher);
+			});
+	}
 
-                    //metadata.addAnalyze(path);
-               })
-               .on("change", (path) => {
-                    console.log("change");
-                    this.metadata.Analyze(path, "check");
-               })
-               .on("unlink", (path) => {
-                    //console.log("cc");
-                    if (!initWatcher) {
-                         this.metadata.Analyze(path, "delete");
-                    }
-               })
-               .on("ready", () => {
-                    logger.info("Fin de l'initialisation");
-                    this.metadata.CleanVolume(this.tmpFile);
-                    initWatcher = false;
+	// Check si l'extension est autorisée et fait le traitement du fichier
+	private traiter(filepath: string, action: string = "add"): void {
+		if (this.metadata.extIsSupported(filepath)) {
+			this.metadata.analyze(filepath, action);
+		}
+	}
 
-
-               });
-     }
-
-
-
-     /**
-      * Retourne la variable utilisé pour la génération des méta données
-      *
-      * @return {*}  {Metadata}
-      * @memberof Watcher
-      */
-     public getMetadata(): Metadata {
-          return this.metadata;
-     }
+	/**
+	 * Retourne la variable utilisé pour la génération des méta données
+	 *
+	 * @return {*}  {Metadata}
+	 * @memberof Watcher
+	 */
+	public getMetadata(): Metadata {
+		return this.metadata;
+	}
 }
-
-

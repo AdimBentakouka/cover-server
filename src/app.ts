@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // Setup bdd
-sequelize.sync({ force: process.env.NODE_ENV === 'development' ? true : false }).then(async () => {
+sequelize.sync({ force: process.env.NODE_ENV === "development" ? true : false }).then(async () => {
      logger.info("Database connected");
 
      //initialisation de l'application
