@@ -17,6 +17,7 @@
             ]
         },
         "typeRoots": [
+            "./src/**/*.d.ts",
             "./src/types",
             "./node_modules/@types"
         ],

@@ -12,29 +12,30 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
 
 * hostname:port/reader/:id/:page => affiche la page numéro :page du volume :id
 
-
----
-## Patch notes
----
-## v1.2.0
-
-  * [ ] Route metadata
-    * [ ] Afficher les volumens récemments ajoutées par ordre d'ajouts
-  * [ ] Services metadata
-    * [ ] Si cover.jpg présent dans le repertoire prendre cette image comme couverture pour tous les volumes
-
+## TODO
+  * [ ] Créer une documentation des routes
+  * [ ] Optimisation
+    * [ ] Rendre cohérent les réponse des routes
+    * [ ] 
   * [ ] Route utilisateur
     * [ ] Récupérer les volumes en cours de lecture / le prochain tome à lire
     * [ ] Récupérer la dernière page lu d'un volume
+    * [ ] 
+---
+## Patch notes
+---
+
+## v1.1.0
+  * [x] Services metadata
+    * [x] Optimisation du service metadata
+    * [x] Si cover.jpg présent dans le repertoire prendre cette image comme couverture pour tous les volumes
 
   * [ ] Optimisation
-    * [ ] Rendre cohérent les réponse des routes
-    * [ ] Avoir un fichier séparer pour les types
+    * [x] Avoir un fichier séparer pour les types
 
-  * [ ] Créer une documentation des routes
 
 ---
-## v1.5.0
+## v1.0.5
 
   * [x] Correction des chemins des templates pour les mails
 

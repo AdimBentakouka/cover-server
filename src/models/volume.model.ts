@@ -3,13 +3,13 @@ import { BuildOptions, DataTypes, Model, Sequelize } from "sequelize";
 export interface VolumeAttributes {
      id?: number;
      name: string;
+     collectionName: string;
      filename: string;
      nbPages: number;
      cover: string;
      sizefile: number;
      createdAt?: Date;
      updatedAt?: Date;
-     collectionId: number;
 
 }
 export interface VolumeModel extends Model<VolumeAttributes>, VolumeAttributes { }
@@ -41,8 +41,8 @@ export function VolumeFactory(sequelize: Sequelize): VolumeStatic {
           sizefile: {
                type: DataTypes.INTEGER
           },
-          collectionId: {
-               type: DataTypes.INTEGER
+          collectionName: {
+               type: DataTypes.STRING
           }
      });
 }
