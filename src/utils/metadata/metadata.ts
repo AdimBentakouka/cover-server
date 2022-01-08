@@ -8,7 +8,7 @@ import { Queue } from ".";
 import Logger from "../../helpers/logger";
 import { Collection, Volume } from "../../models";
 import { CollectionModel } from "../../models/collection.model";
-import { countPage, getPage } from "../readerVolume";
+import { countPage, getPage } from "../reader/readerVolume";
 
 const logger = new Logger("Metadata");
 
@@ -180,7 +180,7 @@ export default class Metadata {
 		return new Promise<void>(async (resolve, reject) => {
 			getPage(filepath)
 				.then((cover) => {
-					this.createCover(coverName, cover);
+					this.createCover(coverName, cover.buffer);
 
 					resolve();
 				})

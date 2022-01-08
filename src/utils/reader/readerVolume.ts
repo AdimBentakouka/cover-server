@@ -4,6 +4,8 @@ import StreamZip from "node-stream-zip";
 import sharp from "sharp";
 import { createExtractorFromData, Extractor } from "node-unrar-js";
 
+import { Reader } from "./";
+
 sharp.cache(false);
 
 /**
@@ -81,8 +83,8 @@ function countPageCBR(filepath: string): Promise<number> {
  * @param {number} indexPage numéro de page
  * @return {*}  {(Promise<Buffer | string>)}
  */
-function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer> {
-	return new Promise<Buffer>(async (resolve, reject) => {
+function getPageCBZ(filepath: string, indexPage: number): Promise<Reader> {
+	return new Promise<Reader>(async (resolve, reject) => {
 		const volume = new StreamZip({
 			file: filepath,
 			storeEntries: true,
@@ -117,7 +119,7 @@ function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer> {
 
 			volume.close();
 
-			resolve(_page);
+			resolve({ buffer: _page, page: indexPage + 1 });
 		});
 
 		volume.on("error", (err) => {
@@ -134,8 +136,8 @@ function getPageCBZ(filepath: string, indexPage: number): Promise<Buffer> {
  * @return {*}  {(Promise<Buffer | string>)}
  */
 
-function getPageCBR(filepath: string, indexPage: number): Promise<Buffer> {
-	return new Promise<Buffer>(async (resolve, reject) => {
+function getPageCBR(filepath: string, indexPage: number): Promise<Reader> {
+	return new Promise<Reader>(async (resolve, reject) => {
 		fs.access(filepath, fs.constants.F_OK, (err) => {
 			if (err) {
 				reject(err.toString());
@@ -181,7 +183,7 @@ function getPageCBR(filepath: string, indexPage: number): Promise<Buffer> {
 
 						const files = [...extracted.files]; //load the files
 
-						resolve(await sharp(files[0].extraction).toBuffer());
+						resolve({ buffer: await sharp(files[0].extraction).toBuffer(), page: indexPage + 1 });
 					})
 					.catch((err: string) => {
 						reject(err.toString());
@@ -238,16 +240,16 @@ export async function countPage(filepath: string): Promise<number> {
  * @param {number} [page=1] page à afficher
  * @return {*}  {(Promise<Buffer | string>)}
  */
-export async function getPage(filepath: string, page: number = 1): Promise<Buffer> {
-	return new Promise<Buffer>(async (resolve, reject) => {
+export async function getPage(filepath: string, page: number = 1): Promise<Reader> {
+	return new Promise<Reader>(async (resolve, reject) => {
 		const ext = path.extname(filepath);
 
 		switch (ext) {
 			case ".zip":
 			case ".cbz":
 				getPageCBZ(filepath, page - 1)
-					.then((dataPage: Buffer) => {
-						resolve(dataPage);
+					.then((data: Reader) => {
+						resolve(data);
 					})
 					.catch((err: string) => {
 						reject(err);
@@ -257,8 +259,8 @@ export async function getPage(filepath: string, page: number = 1): Promise<Buffe
 			case ".rar":
 			case ".cbr":
 				getPageCBR(filepath, page - 1)
-					.then((dataPage: Buffer) => {
-						resolve(dataPage);
+					.then((data: Reader) => {
+						resolve(data);
 					})
 					.catch((err: string) => {
 						reject(err);
