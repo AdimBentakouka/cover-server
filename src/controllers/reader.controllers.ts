@@ -25,20 +25,28 @@ export const routeGetPage = (req: IGetUserAuthInfoRequest, res: Response): void 
 				getPage(volume.filename, currentPage).then(async (data) => {
 					VolumeRead.findOne({ where: { userId: user.id, volumeId: volume.id } })
 						.then((volumeRead) => {
+							const isCompleted = data.page === volume.nbPages ? true : false;
 							if (volumeRead) {
-								volumeRead.currentPage = currentPage;
-								volumeRead.save();
+								if (data.page !== 1) {
+									volumeRead.currentPage = data.page;
+									volumeRead.isCompleted = isCompleted;
+									volumeRead.save();
+								}
 							} else {
 								VolumeRead.create({
 									userId: user.id,
 									volumeId: volume.id,
+									collectionId: volume.collectionId,
 									currentPage: data.page,
+									isCompleted,
 								}).catch((err) => {
+									console.log(err);
 									return err;
 								});
 							}
 						})
 						.catch((err) => {
+							console.log(err);
 							return err;
 						});
 					res.set({ "Content-Type": "image/*" });

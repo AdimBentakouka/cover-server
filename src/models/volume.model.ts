@@ -4,10 +4,13 @@ export interface VolumeAttributes {
 	id?: number;
 	name: string;
 	collectionId: number;
+	collectionName?: string;
 	filename: string;
 	nbPages: number;
 	cover: string;
 	sizefile: number;
+	isCompleted?: string;
+	currentPage?: string;
 	createdAt?: Date;
 	updatedAt?: Date;
 }

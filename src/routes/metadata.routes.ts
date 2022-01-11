@@ -6,6 +6,7 @@ import * as authMiddleware from "../middlewares/auth.middleware";
 const metadataRouter = Router();
 
 metadataRouter.get("/", authMiddleware.authentificate, metadataControllers.getCollections);
+metadataRouter.get("/getcurrentvolumes", authMiddleware.authentificate, metadataControllers.getVolumesRead);
 metadataRouter.get("/getAnalyze", authMiddleware.authentificate, metadataControllers.getQueueAnalyze);
 metadataRouter.get("/getCover/:covername", metadataControllers.getCover);
 metadataRouter.get("/:nameCollection", authMiddleware.authentificate, metadataControllers.getVolumes);

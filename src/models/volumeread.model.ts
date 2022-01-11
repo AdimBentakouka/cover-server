@@ -4,6 +4,8 @@ export interface VolumeReadAttributes {
 	id?: number;
 	userId: string;
 	volumeId: number;
+	collectionId: number;
+	isCompleted?: boolean;
 	currentPage: number;
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -27,6 +29,13 @@ export function VolumeReadFactory(sequelize: Sequelize): VolumeReadStatic {
 		},
 		volumeId: {
 			type: DataTypes.INTEGER,
+		},
+		collectionId: {
+			type: DataTypes.INTEGER,
+		},
+		isCompleted: {
+			type: DataTypes.BOOLEAN,
+			defaultValue: false,
 		},
 		currentPage: {
 			type: DataTypes.INTEGER,
