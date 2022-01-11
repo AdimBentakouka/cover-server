@@ -30,8 +30,8 @@ d'e-book au format (.zip, .rar, .cbz, .cbr)
 
 -   [x] Optimisation
     -   [x] Avoir un fichier séparer pour les types
--   [ ] Route utilisateur
-    -   [ ] Récupérer les volumes en cours de lecture / le prochain tome à lire
+-   [x] Route utilisateur
+    -   [x] Récupérer les volumes en cours de lecture / le prochain tome à lire
 
 ---
 
