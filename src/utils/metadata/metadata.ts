@@ -5,7 +5,7 @@ import sharp from "sharp";
 import Sequelize from "sequelize";
 
 import { Queue } from ".";
-import Logger from "../../helpers/logger";
+import Logger from "../logger";
 import { Collection, Volume } from "../../models";
 import { CollectionModel } from "../../models/collection.model";
 import { countPage, getPage } from "../reader/readerVolume";

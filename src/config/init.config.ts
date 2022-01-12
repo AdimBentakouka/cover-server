@@ -1,7 +1,7 @@
 import * as bcrypt from "bcrypt";
 
 import { User } from "../models/";
-import Logger from "../helpers/logger";
+import Logger from "../utils/logger";
 
 import Watcher from "../utils/watchdir";
 import { initMetadataController } from "../controllers/metadata.controllers";

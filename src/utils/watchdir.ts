@@ -1,7 +1,7 @@
 import chokidar from "chokidar";
 import Metadata from "./metadata/metadata";
 
-import Logger from "../helpers/logger";
+import Logger from "./logger";
 
 const logger = new Logger("Watcher");
 
