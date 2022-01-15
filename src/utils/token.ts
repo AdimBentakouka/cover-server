@@ -71,8 +71,6 @@ export function generateNewToken(refreshToken: string): Promise<string> {
 					_session.lastUsage = new Date();
 					_session.save();
 
-					console.log(_session);
-
 					resolve(
 						generateToken({
 							id: _session.user.id,
