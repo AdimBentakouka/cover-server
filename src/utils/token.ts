@@ -58,7 +58,7 @@ export function generateNewToken(refreshToken: string): Promise<string> {
 			attributes: ["id", "lastUsage"],
 			include: [
 				{
-					attributes: ["name", "email", "isAdmin", "accountValid"],
+					attributes: ["id", "name", "email", "isAdmin", "accountValid"],
 					model: User,
 				},
 			],
@@ -71,9 +71,11 @@ export function generateNewToken(refreshToken: string): Promise<string> {
 					_session.lastUsage = new Date();
 					_session.save();
 
+					console.log(_session);
+
 					resolve(
 						generateToken({
-							id: _session.userId,
+							id: _session.user.id,
 							email: _session.user.email,
 							name: _session.user.name,
 							isAdmin: _session.user.isAdmin,

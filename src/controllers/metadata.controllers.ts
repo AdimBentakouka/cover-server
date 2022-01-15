@@ -43,7 +43,7 @@ export const getCollections = (req: Request, res: Response): void => {
 };
 
 export const getVolumesRead = async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
-	const userId = req.user.id;
+	const userId = req.user.id || null;
 	const volumeHistory: VolumeModel[] = [];
 
 	// Récupérer les collections commencer
