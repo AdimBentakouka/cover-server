@@ -1,10 +1,16 @@
 import { Request, Response } from "express";
 import { Sequelize } from "sequelize";
 import fs from "fs";
+import ip from "ip";
+
 import Metadata from "../utils/metadata/metadata";
 import { Collection, Volume, VolumeRead } from "../models/";
 import { IGetUserAuthInfoRequest } from "../types/express";
 import { VolumeModel } from "../models/volume.model";
+
+const PORT = process.env.PORT || 3000;
+
+const PATH_COVER = "http://" + ip.address() + ":" + PORT + "/metadata/getcover/";
 
 let _metadata: Metadata;
 
@@ -21,24 +27,53 @@ export const initMetadataController = (metadata: Metadata): void => {
  * @param req
  * @param res
  */
-export const getCollections = (req: Request, res: Response): void => {
+export const getCollections = (req: IGetUserAuthInfoRequest, res: Response): void => {
 	Collection.findAll({
-		attributes: ["id", "name", "cover", [Sequelize.fn("COUNT", Sequelize.col("*")), "nbVolumes"], "createdAt", "updatedAt"],
+		attributes: ["id", "name", [Sequelize.literal("'" + PATH_COVER + "' || collections.cover"), "cover"], "createdAt", "updatedAt"],
 		include: [
 			{
-				attributes: [],
+				attributes: ["id"],
 				model: Volume,
+				separate: true,
+				required: true,
+			},
+			{
+				attributes: ["id"],
+				model: VolumeRead,
+				separate: true,
+				where: {
+					userId: req.user.id,
+					isCompleted: 1,
+				},
+				required: false,
 			},
 		],
 
-		group: "collections.name",
 		order: [["name", "asc"]],
 	})
 		.then((data) => {
-			res.send(data);
+			const result: {
+				id?: number;
+				name: string;
+				cover?: string;
+				createdAt?: Date;
+				updatedAt?: Date;
+				nbVolumes?: number;
+				nbVolumesRead?: number;
+			}[] = [];
+			data.map((collection) => {
+				const { volumes, volumeReads, id, name, cover, createdAt, updatedAt } = collection.get({ plain: true });
+				const nbVolumes = volumes?.length || 0;
+				const nbVolumesRead = volumeReads?.length || 0;
+
+				result.push({ id, name, cover, nbVolumes, nbVolumesRead, createdAt, updatedAt });
+			});
+
+			res.send(result);
 		})
 		.catch((err) => {
-			res.send(err);
+			console.log(err);
+			res.status(400).send(err);
 		});
 };
 
@@ -68,11 +103,11 @@ export const getVolumesRead = async (req: IGetUserAuthInfoRequest, res: Response
 			attributes: [
 				"id",
 				"name",
-				"cover",
+				[Sequelize.literal("'" + PATH_COVER + "' || cover"), "cover"],
 				"nbPages",
-				"createdAt",
 				[Sequelize.col("volumeReads.isCompleted"), "isCompleted"],
 				[Sequelize.col("volumeReads.currentPage"), "currentPage"],
+				"createdAt",
 			],
 			include: [
 				{
@@ -128,7 +163,7 @@ export const getVolumes = (req: IGetUserAuthInfoRequest, res: Response): void =>
 			"id",
 			"name",
 			"nbPages",
-			"cover",
+			[Sequelize.literal("'" + PATH_COVER + "' || volumes.cover"), "cover"],
 			"createdAt",
 			[Sequelize.col("volumereads.currentPage"), "currentPage"],
 			[Sequelize.col("volumereads.isCompleted"), "isCompleted"],
@@ -160,6 +195,31 @@ export const getVolumes = (req: IGetUserAuthInfoRequest, res: Response): void =>
 		});
 };
 
+export const getSearchCollection = async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
+	try {
+		const collections = await Collection.findAll({
+			attributes: [
+				"name",
+				[Sequelize.literal("'" + PATH_COVER + "' || collections.cover"), "cover"],
+				[Sequelize.literal("count(*) || ' volumes'"), "desc"],
+			],
+			include: [
+				{
+					attributes: [],
+					model: Volume,
+				},
+			],
+
+			group: "collections.name",
+			order: [["name", "asc"]],
+		});
+
+		res.send(collections);
+	} catch (e) {
+		res.send(e);
+	}
+};
+
 /**
  * Permet de récupérer la liste des élements analysées
  * @param req Request
@@ -186,4 +246,98 @@ export const getCover = (req: Request, res: Response): void => {
 		res.set({ "Content-Type": "image/*" });
 		res.send(data);
 	});
+};
+
+export const setReadVolume = async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
+	const volumeId = parseInt(req.params.id);
+	const user = req.user;
+
+	try {
+		const volumeRead = await VolumeRead.findOne({ where: { userId: user.id, volumeId: volumeId } });
+		const volume = await Volume.findOne({ where: { id: volumeId } });
+
+		if (volumeRead) {
+			volumeRead.isCompleted = true;
+			volumeRead.currentPage = volume.nbPages;
+
+			volumeRead.save();
+			res.send("done");
+		} else {
+			VolumeRead.create({
+				userId: user.id,
+				volumeId: volume.id,
+				collectionId: volume.collectionId,
+				currentPage: volume.nbPages,
+				isCompleted: true,
+			});
+
+			res.send("done");
+		}
+	} catch (e) {
+		console.error(e);
+		res.status(400).send(e);
+	}
+};
+
+export const setUnreadVolume = async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
+	const volumeId = parseInt(req.params.id);
+	const user = req.user;
+
+	try {
+		const volumeRead = await VolumeRead.findOne({ where: { userId: user.id, volumeId: volumeId } });
+
+		volumeRead.destroy();
+
+		res.send("done");
+	} catch (e) {
+		res.status(400).send(e);
+	}
+};
+
+export const setCollectionRead = async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
+	const collectionId = parseInt(req.params.id);
+	const user = req.user;
+
+	try {
+		const volumes = await Volume.findAll({ where: { collectionId: collectionId } });
+		const createVolumesRead: { userId: string; volumeId: number; collectionId: number; currentPage: number; isCompleted: boolean }[] =
+			[];
+
+		for (const volume of volumes) {
+			const volumeRead = await VolumeRead.findOne({ where: { volumeId: volume.id, userId: user.id } });
+
+			if (volumeRead && !volumeRead.isCompleted) {
+				volumeRead.currentPage = volume.nbPages;
+				volumeRead.isCompleted = true;
+
+				volumeRead.save();
+			}
+			if (!volumeRead) {
+				createVolumesRead.push({
+					userId: user.id,
+					volumeId: volume.id,
+					collectionId: volume.collectionId,
+					currentPage: volume.nbPages,
+					isCompleted: true,
+				});
+			}
+		}
+		await VolumeRead.bulkCreate(createVolumesRead);
+		res.send("done");
+	} catch (e) {
+		res.status(400).send(e);
+	}
+};
+
+export const setCollectionUnRead = async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
+	const collectionId = parseInt(req.params.id);
+	const user = req.user;
+
+	try {
+		VolumeRead.destroy({ where: { collectionId: collectionId, userId: user.id } });
+
+		res.send("done");
+	} catch (e) {
+		res.status(400).send(e);
+	}
 };

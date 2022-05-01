@@ -1,3 +1,4 @@
+import ip from "ip";
 import errorHandler from "errorhandler";
 import "./config/dotenv.config";
 import app from "./app";
@@ -17,9 +18,10 @@ if (process.env.NODE_ENV === "development") {
  * Start Express server.
  */
 const server = app.listen(app.get("port"), () => {
+	console.table();
 	logger.info("-------------------------------------------------");
 	logger.info("- Server start !");
-	logger.info("- http://localhost:" + app.get("port"));
+	logger.info("- " + ip.address() + ":" + app.get("port"));
 	logger.info("- " + app.get("env") + " environment");
 });
 
