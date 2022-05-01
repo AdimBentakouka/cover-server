@@ -7,6 +7,9 @@ export interface CollectionAttributes {
 	createdAt?: Date;
 	updatedAt?: Date;
 	volumes?: [];
+	volumeReads?: [];
+	nbVolumes?: number;
+	nbVolumesRead?: number;
 }
 export interface CollectionModel extends Model<CollectionAttributes>, CollectionAttributes {}
 export class Collection extends Model<CollectionModel, CollectionAttributes> {}

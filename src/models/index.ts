@@ -50,6 +50,7 @@ _Session.belongsTo(_User);
 _User.hasMany(_VolumeRead);
 _Collection.hasMany(_VolumeRead);
 _Volume.hasMany(_VolumeRead);
+
 _VolumeRead.belongsTo(_User);
 _VolumeRead.belongsTo(_Collection);
 _VolumeRead.belongsTo(_Volume);

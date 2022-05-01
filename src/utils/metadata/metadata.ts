@@ -73,7 +73,7 @@ export default class Metadata {
 
 		const collection = await this.getCollection(path.dirname(filepath));
 
-		if (!collection.cover) {
+		if (!collection.cover || (collection.cover !== NAME_COVER_COLLECTION && collection.cover > coverName)) {
 			collection.cover = coverName;
 			collection.save();
 		}
