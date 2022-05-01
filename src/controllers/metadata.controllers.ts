@@ -1,16 +1,11 @@
 import { Request, Response } from "express";
 import { Sequelize } from "sequelize";
 import fs from "fs";
-import ip from "ip";
 
 import Metadata from "../utils/metadata/metadata";
 import { Collection, Volume, VolumeRead } from "../models/";
 import { IGetUserAuthInfoRequest } from "../types/express";
 import { VolumeModel } from "../models/volume.model";
-
-const PORT = process.env.PORT || 3000;
-
-const PATH_COVER = "http://" + ip.address() + ":" + PORT + "/metadata/getcover/";
 
 let _metadata: Metadata;
 
@@ -28,8 +23,9 @@ export const initMetadataController = (metadata: Metadata): void => {
  * @param res
  */
 export const getCollections = (req: IGetUserAuthInfoRequest, res: Response): void => {
+	console.log(req.get("host"));
 	Collection.findAll({
-		attributes: ["id", "name", [Sequelize.literal("'" + PATH_COVER + "' || collections.cover"), "cover"], "createdAt", "updatedAt"],
+		attributes: ["id", "name", "cover", "createdAt", "updatedAt"],
 		include: [
 			{
 				attributes: ["id"],
@@ -103,7 +99,7 @@ export const getVolumesRead = async (req: IGetUserAuthInfoRequest, res: Response
 			attributes: [
 				"id",
 				"name",
-				[Sequelize.literal("'" + PATH_COVER + "' || cover"), "cover"],
+				"cover",
 				"nbPages",
 				[Sequelize.col("volumeReads.isCompleted"), "isCompleted"],
 				[Sequelize.col("volumeReads.currentPage"), "currentPage"],
@@ -163,7 +159,7 @@ export const getVolumes = (req: IGetUserAuthInfoRequest, res: Response): void =>
 			"id",
 			"name",
 			"nbPages",
-			[Sequelize.literal("'" + PATH_COVER + "' || volumes.cover"), "cover"],
+			"cover",
 			"createdAt",
 			[Sequelize.col("volumereads.currentPage"), "currentPage"],
 			[Sequelize.col("volumereads.isCompleted"), "isCompleted"],
@@ -198,11 +194,7 @@ export const getVolumes = (req: IGetUserAuthInfoRequest, res: Response): void =>
 export const getSearchCollection = async (req: IGetUserAuthInfoRequest, res: Response): Promise<void> => {
 	try {
 		const collections = await Collection.findAll({
-			attributes: [
-				"name",
-				[Sequelize.literal("'" + PATH_COVER + "' || collections.cover"), "cover"],
-				[Sequelize.literal("count(*) || ' volumes'"), "desc"],
-			],
+			attributes: ["name", "cover", [Sequelize.literal("count(*) || ' volumes'"), "desc"]],
 			include: [
 				{
 					attributes: [],
