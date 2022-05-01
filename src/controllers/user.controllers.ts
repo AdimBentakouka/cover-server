@@ -1,5 +1,7 @@
 import * as bcrypt from "bcrypt";
 import { Request, Response } from "express";
+import { Sequelize } from "sequelize";
+
 import { IGetUserAuthInfoRequest } from "../types/express/";
 
 import { User } from "../models";
@@ -86,7 +88,7 @@ export const login = (req: Request, res: Response): void => {
 		res.status(400).send("Veuillez renseigner les champs email et password");
 	} else {
 		//Check s'il le compte existe
-		User.findOne({ where: { email: email } })
+		User.findOne({ where: Sequelize.where(Sequelize.fn("upper", Sequelize.col("email")), email.toUpperCase()) })
 			.then(async (user) => {
 				if (user) {
 					const passwordValid = bcrypt.compareSync(password, user.password);
@@ -118,11 +120,11 @@ export const login = (req: Request, res: Response): void => {
 							res.status(400).send("Le compte n'a pas été validé par l'administrateur !");
 						}
 					} else {
-						res.status(400).send("Le couple email / mot de passe est incorrecte !");
+						res.status(400).send("Mot de passe incorrect !");
 					}
 				} else {
 					logger.warn(`Le compte ${email} est introuvable !`);
-					res.status(400).send("Le couple email / mot de passe est incorrecte !");
+					res.status(400).send("Adresse e-mail introuvable !");
 				}
 			})
 			.catch((err) => {
@@ -202,7 +204,34 @@ export const getAllAccount = (req: IGetUserAuthInfoRequest, res: Response): void
 				res.json(data);
 			})
 			.catch((err) => {
+				console.log(err);
 				res.status(400).send(err);
 			});
+	}
+};
+
+export const deleteAccount = (req: IGetUserAuthInfoRequest, res: Response): void => {
+	if (!req.user) {
+		res.status(401).send("Authentification requise !");
+	} else if (!req.user.isAdmin) {
+		res.status(403).send("Vous n'avez pas les droits");
+	} else {
+		if (req.params.id) {
+			User.findOne({
+				attributes: ["id", "name", "email", "isAdmin", "accountValid", "createdAt"],
+				where: { id: req.params.id },
+			})
+				.then(async (user) => {
+					if (user.isAdmin) {
+						res.status(400).send("Vous n'avez pas les droits pour supprimer ce compte");
+					} else {
+						await user.destroy();
+						res.send("Compte supprimé");
+					}
+				})
+				.catch((err) => {
+					res.status(400).send(err);
+				});
+		}
 	}
 };
